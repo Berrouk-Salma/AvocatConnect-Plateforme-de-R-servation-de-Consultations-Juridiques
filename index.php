@@ -141,20 +141,41 @@
         </div>
     </div>
 </section>
-    <section class="bg-[#ffedbf] py-16">
-    <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+<!-- yellow -->
+<section class="bg-[#f3e8d2] py-24">
+    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
         <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Pourquoi Nous Choisir</h2>
-            <p class="text-gray-600 mb-6">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. 
-                Nunc posuere purus rhoncus pulvinar aliquam.
+            <h2 class="text-[#121921] text-5xl font-light mb-6">Why Choose Us</h2>
+            <!-- Decorative Line -->
+            <div class="flex gap-2 mb-8">
+                <span class="w-2 h-2 bg-[#bb9a4f] rounded-full"></span>
+                <span class="w-8 h-0.5 bg-[#bb9a4f]"></span>
+                <span class="w-2 h-2 bg-[#bb9a4f] rounded-full"></span>
+                <span class="w-8 h-0.5 bg-[#bb9a4f]"></span>
+                <span class="w-2 h-2 bg-[#bb9a4f] rounded-full"></span>
+            </div>
+            
+            <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc 
+                quis malesuada orci, sit amet sagittis ligula. Aliquam pulvinar 
+                nunc a arcu eleifend pellentesque. Donec mollis tempus urna non 
+                condimentum. Nunc sed erat ut ante laoreet fermentum.
             </p>
-            <button class="bg-yellow-500 text-black px-6 py-2 font-semibold">
-                ÉVALUATION GRATUITE
+
+            <p class="text-gray-600 text-lg mb-12 leading-relaxed">
+                Aliquam rhoncus velit purus, id vestibulum nulla ornare a. 
+                Maecenas odio erat, sodales sed mauris id, euismod tempor ante. 
+                Donec non luctus ipsum. Maecenas pulvinar turpis ac turpis 
+                vehicula ultrices at sed dui.
+            </p>
+
+            <button class="bg-[#bb9a4f] text-[#121921] px-12 py-4 text-lg font-semibold hover:bg-[#a68a45] transition-colors duration-300">
+                FREE EVALUATION
             </button>
         </div>
         <div>
-            <img src="./assets/images/cho.jpg" alt="Avocat parlant" class="w-full rounded-lg shadow-lg"/>
+            <img src="./assets/images/bw.jpg" alt="Professional Lawyer Speaking" 
+                 class="w-full rounded-lg shadow-xl"/>
         </div>
     </div>
 </section>
@@ -275,10 +296,10 @@
             <!-- Curved Dark Background -->
             <div class="absolute inset-0 bg-[#110801] rounded-[100px] transform -skew-y-3"></div>
             
-            <!-- Testimonial Content -->
+            <!--lawyees -->
             <div class="relative grid md:grid-cols-2 gap-12 items-center p-16">
                 <div class="max-w-md mx-auto">
-                    <img src="./assets/images/gss.jpg" alt="John Doe" 
+                    <img src="./assets/images/lawyers.jpg" alt="John Doe" 
                          class="w-full rounded-lg shadow-xl"/>
                 </div>
                 <div class="max-w-xl">
@@ -321,14 +342,14 @@
             Aliquam pulvinar nunc a arcu eleifend pellentesque.
         </p>
 
-        <!-- Contact Methods -->
+        <!-- Contact  -->
         <div class="grid md:grid-cols-3 gap-16 text-center mt-8">
             <div class="group cursor-pointer">
                 <h3 class="text-[#bb9a4f] text-3xl font-light mb-6 transition-transform duration-300 group-hover:-translate-y-1">
                     Email Us At
                 </h3>
                 <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                    contact@brandname.com
+                    salmaberrouk4@gmail.com
                 </p>
             </div>
 
@@ -337,7 +358,7 @@
                     Give Us A Call
                 </h3>
                 <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                    +1 234 567 8910
+                    +212-649236388
                 </p>
             </div>
 
@@ -346,7 +367,7 @@
                     Visit Us At
                 </h3>
                 <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                    92 Dogwood Road Phoenix Arizona US 85003
+                https://github.com/Berrouk-Salma
                 </p>
             </div>
         </div>
@@ -356,7 +377,8 @@
 <!-- Footer -->
 <footer class="py-8 border-t border-[#bb9a4f]/20 bg-[#001a10]">
     <div class="max-w-6xl mx-auto px-4 text-center">
-        <p class="text-gray-400">Company Title Inc. © 2024. All Rights Reserved</p>
+        <p class="text-gray-400">Lawyers © 2024. All Rights Reserved
+       <br> Created by Salma Berrouk</p>
     </div>
 </footer>
 </body>
