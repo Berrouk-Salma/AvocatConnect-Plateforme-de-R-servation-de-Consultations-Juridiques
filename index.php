@@ -15,7 +15,7 @@
                 <span class="text-yellow-500 text-2xl">⚖ LawQuill</span>
             </div>
             <button class="text-yellow-500 border border-yellow-500 px-4 py-2">
-                (+123) 567-89
+                
             </button>
         </div>
     </header>
