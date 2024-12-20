@@ -1,221 +1,242 @@
 <?php
-require '../includes/config.php';
+require_once '../includes/config.php';
+require_once '../includes/functions.php';
 
-// if (!lognin() || !isAvocat()) {
-//     header('Location: ./auth/login.php');
-//     exit();
-// }
-
+// Vérification si l'utilisateur est connecté et est un avocat
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'avocat') {
+    header('Location: ../login.php');
+    exit();
+}
 
 // Récupérer les informations de l'avocat
-$query = "SELECT * FROM users WHERE id = ?";
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("i", $_SESSION['user_id']);
+$avocat_id = $_SESSION['user_id'];
+$stmt = $mysqli->prepare("
+    SELECT u.*, i.* 
+    FROM users u 
+    LEFT JOIN information i ON u.id = i.user_id 
+    WHERE u.id = ?
+");
+$stmt->bind_param("i", $avocat_id);
 $stmt->execute();
-$avocat = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+$result = $stmt->get_result();
+$avocat = $result->fetch_assoc();
 
-// Récupérer les réservations en attente
-$query = "SELECT r.*, u.firstname, u.lastname, u.email, u.phone 
-          FROM reservation r 
-          JOIN users u ON r.id_client = u.id 
-          WHERE r.id_avocat = ? AND r.status = 'pending' 
-          ORDER BY r.reservation_date ASC";
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("i", $_SESSION['user_id']);
+// Récupérer les rendez-vous du jour
+$today = date('Y-m-d');
+$stmt = $mysqli->prepare("
+    SELECT r.*, u.firstname, u.lastname, u.email, u.phone
+    FROM reservation r
+    JOIN users u ON r.id_client = u.id
+    WHERE r.id_avocat = ? 
+    AND DATE(r.reservation_date) = ?
+    ORDER BY r.reservation_date ASC
+");
+$stmt->bind_param("is", $avocat_id, $today);
 $stmt->execute();
-$pending_reservations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$appointments_today = $stmt->get_result();
 
-// Récupérer les réservations d'aujourd'hui
-$query = "SELECT r.*, u.firstname, u.lastname 
-          FROM reservation r 
-          JOIN users u ON r.id_client = u.id 
-          WHERE r.id_avocat = ? 
-          AND r.status = 'approved' 
-          AND DATE(r.reservation_date) = CURDATE()";
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("i", $_SESSION['user_id']);
+// Statistiques
+$stmt = $mysqli->prepare("SELECT COUNT(*) FROM reservation WHERE id_avocat = ? AND status = 'pending'");
+$stmt->bind_param("i", $avocat_id);
 $stmt->execute();
-$today_reservations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$pending_count = $stmt->get_result()->fetch_row()[0];
+
+$stmt = $mysqli->prepare("SELECT COUNT(*) FROM reservation WHERE id_avocat = ? AND status = 'approved'");
+$stmt->bind_param("i", $avocat_id);
+$stmt->execute();
+$approved_count = $stmt->get_result()->fetch_row()[0];
+
+$stmt = $mysqli->prepare("
+    SELECT COUNT(*) 
+    FROM reservation 
+    WHERE id_avocat = ? 
+    AND status = 'approved' 
+    AND DATE(reservation_date) = ?
+");
+$stmt->bind_param("is", $avocat_id, $today);
+$stmt->execute();
+$today_count = $stmt->get_result()->fetch_row()[0];
+
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Tableau de Bord - Avocat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Avocat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-[#001a10]">
     <!-- Navigation -->
-    <nav class="bg-[#001a10] text-white p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <span class="text-[#bb9a4f] text-2xl">⚖ LawQuill</span>
-            <div class="flex items-center space-x-4">
-                <a href="dashboard.php" class="text-[#bb9a4f]">Tableau de Bord</a>
-                <a href="profile.php" class="hover:text-[#bb9a4f]">Mon Profil</a>
-                <a href="disponibilites.php" class="hover:text-[#bb9a4f]">Disponibilités</a>
-                <a href="reservations.php" class="hover:text-[#bb9a4f]">Réservations</a>
-                <a href="../auth/logout.php" class="hover:text-[#bb9a4f]">Déconnexion</a>
+    <nav class="bg-[#001a10] border-b border-[#bb9a4f]/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="../index.php" class="text-[#bb9a4f] text-2xl">⚖ LawQuill</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-[#bb9a4f] mr-4">
+                        <?php echo htmlspecialchars($avocat['firstname'] . ' ' . $avocat['lastname']); ?>
+                    </span>
+                    <a href="../logout.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Déconnexion</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mx-auto px-4 py-8">
-        <!-- En-tête du tableau de bord -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-2xl font-bold mb-4">Bienvenue, <?php echo htmlspecialchars($avocat['firstname'] . ' ' . $avocat['lastname']); ?></h1>
-            <p class="text-gray-600">Voici un aperçu de votre journée</p>
-        </div>
-
-        <!-- Statistiques -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100 text-blue-500">
-                        <i class="fas fa-calendar-check fa-2x"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-gray-600">Rendez-vous du jour</h2>
-                        <p class="text-2xl font-bold"><?php echo count($today_reservations); ?></p>
-                    </div>
-                </div>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white/10 p-6 rounded-lg">
+                <h3 class="text-[#bb9a4f] text-lg font-semibold mb-2">Demandes en attente</h3>
+                <p class="text-4xl text-white"><?php echo $pending_count; ?></p>
             </div>
-
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
-                        <i class="fas fa-clock fa-2x"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-gray-600">En attente</h2>
-                        <p class="text-2xl font-bold"><?php echo count($pending_reservations); ?></p>
-                    </div>
-                </div>
+            <div class="bg-white/10 p-6 rounded-lg">
+                <h3 class="text-[#bb9a4f] text-lg font-semibold mb-2">Rendez-vous approuvés</h3>
+                <p class="text-4xl text-white"><?php echo $approved_count; ?></p>
             </div>
-
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-100 text-green-500">
-                        <i class="fas fa-user-check fa-2x"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-gray-600">Total Clients</h2>
-                        <p class="text-2xl font-bold">
-                            <?php 
-                            // Requête pour compter le nombre total de clients uniques
-                            $query = "SELECT COUNT(DISTINCT id_client) as total FROM reservation WHERE id_avocat = ?";
-                            $stmt = $mysqli->prepare($query);
-                            $stmt->bind_param("i", $_SESSION['user_id']);
-                            $stmt->execute();
-                            $result = $stmt->get_result()->fetch_assoc();
-                            echo $result['total'];
-                            $stmt->close();
-                            ?>
-                        </p>
-                    </div>
+            <div class="bg-white/10 p-6 rounded-lg">
+                <h3 class="text-[#bb9a4f] text-lg font-semibold mb-2">Rendez-vous aujourd'hui</h3>
+                <p class="text-4xl text-white"><?php echo $today_count; ?></p>
+            </div>
+            <div class="bg-white/10 p-6 rounded-lg">
+                <h3 class="text-[#bb9a4f] text-lg font-semibold mb-2">Actions rapides</h3>
+                <div class="flex gap-2">
+                    <a href="dispo.php" class="text-[#bb9a4f] hover:text-[#a68a45] text-sm">Gérer disponibilités</a>
+                    <span class="text-[#bb9a4f]">|</span>
+                    <a href="profile.php" class="text-[#bb9a4f] hover:text-[#a68a45] text-sm">Voir profil</a>
                 </div>
             </div>
         </div>
 
-        <!-- Rendez-vous d'aujourd'hui -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-bold mb-4">Rendez-vous d'aujourd'hui</h2>
-            <?php if (empty($today_reservations)): ?>
-                <p class="text-gray-600">Aucun rendez-vous prévu pour aujourd'hui</p>
-            <?php else: ?>
+        <!-- Rendez-vous du jour -->
+        <div class="bg-white/10 rounded-lg p-6 mb-8">
+            <h2 class="text-[#bb9a4f] text-xl font-semibold mb-4">Rendez-vous du jour</h2>
+            <?php if ($appointments_today->num_rows > 0): ?>
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heure</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <tr class="text-[#bb9a4f] text-left">
+                                <th class="py-3 px-4">Heure</th>
+                                <th class="py-3 px-4">Client</th>
+                                <th class="py-3 px-4">Contact</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php foreach ($today_reservations as $reservation): ?>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <?php echo date('H:i', strtotime($reservation['reservation_date'])); ?>
+                        <tbody>
+                            <?php while ($appointment = $appointments_today->fetch_assoc()): ?>
+                                <tr class="border-t border-[#bb9a4f]/20">
+                                    <td class="py-3 px-4 text-white">
+                                        <?php echo date('H:i', strtotime($appointment['reservation_date'])); ?>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <?php echo htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']); ?>
+                                    <td class="py-3 px-4 text-white">
+                                        <?php echo htmlspecialchars($appointment['firstname'] . ' ' . $appointment['lastname']); ?>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Confirmé
+                                    <td class="py-3 px-4">
+                                        <a href="mailto:<?php echo $appointment['email']; ?>" class="text-[#bb9a4f] hover:text-[#a68a45]">
+                                            <?php echo htmlspecialchars($appointment['email']); ?>
+                                        </a>
+                                        <br>
+                                        <a href="tel:<?php echo $appointment['phone']; ?>" class="text-[#bb9a4f] hover:text-[#a68a45]">
+                                            <?php echo htmlspecialchars($appointment['phone']); ?>
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded text-sm 
+                                            <?php 
+                                            switch($appointment['status']) {
+                                                case 'pending':
+                                                    echo 'bg-yellow-100 text-yellow-800';
+                                                    break;
+                                                case 'approved':
+                                                    echo 'bg-green-100 text-green-800';
+                                                    break;
+                                                case 'rejected':
+                                                    echo 'bg-red-100 text-red-800';
+                                                    break;
+                                                case 'completed':
+                                                    echo 'bg-blue-100 text-blue-800';
+                                                    break;
+                                            }
+                                            ?>">
+                                            <?php echo ucfirst($appointment['status']); ?>
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Voir détails</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Demandes en attente -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold mb-4">Demandes en attente</h2>
-            <?php if (empty($pending_reservations)): ?>
-                <p class="text-gray-600">Aucune demande en attente</p>
-            <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php foreach ($pending_reservations as $reservation): ?>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <?php echo date('d/m/Y H:i', strtotime($reservation['reservation_date'])); ?>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <?php echo htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']); ?>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900"><?php echo htmlspecialchars($reservation['email']); ?></div>
-                                        <div class="text-sm text-gray-500"><?php echo htmlspecialchars($reservation['phone']); ?></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <form method="POST" action="traiter_reservation.php" class="inline-block">
-                                            <input type="hidden" name="id_reservation" value="<?php echo $reservation['id_reservation']; ?>">
-                                            <button type="submit" name="action" value="approve" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-2">
-                                                Accepter
+                                    <td class="py-3 px-4">
+                                        <?php if ($appointment['status'] === 'pending'): ?>
+                                            <button 
+                                                onclick="updateStatus(<?php echo $appointment['id_reservation']; ?>, 'approved')"
+                                                class="text-green-500 hover:text-green-600 mr-2">
+                                                Approuver
                                             </button>
-                                            <button type="submit" name="action" value="reject" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                            <button 
+                                                onclick="updateStatus(<?php echo $appointment['id_reservation']; ?>, 'rejected')"
+                                                class="text-red-500 hover:text-red-600">
                                                 Refuser
                                             </button>
-                                        </form>
+                                        <?php elseif ($appointment['status'] === 'approved'): ?>
+                                            <button 
+                                                onclick="updateStatus(<?php echo $appointment['id_reservation']; ?>, 'completed')"
+                                                class="text-blue-500 hover:text-blue-600">
+                                                Marquer comme terminé
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
+            <?php else: ?>
+                <p class="text-gray-300">Aucun rendez-vous aujourd'hui</p>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-[#001a10] text-white mt-8 py-4">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-sm text-gray-400">© 2024 LawQuill - Tous droits réservés</p>
-        </div>
-    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    function updateStatus(reservationId, newStatus) {
+        Swal.fire({
+            title: 'Êtes-vous sûr?',
+            text: `Voulez-vous ${newStatus === 'approved' ? 'approuver' : newStatus === 'rejected' ? 'refuser' : 'marquer comme terminé'} ce rendez-vous?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#bb9a4f',
+            cancelButtonColor: '#718096',
+            confirmButtonText: 'Oui',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ici, ajoutez la logique pour mettre à jour le statut via AJAX
+                fetch(`update_status.php?id=${reservationId}&status=${newStatus}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Mise à jour!',
+                            'Le statut a été mis à jour avec succès.',
+                            'success'
+                        ).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Erreur!',
+                            'Une erreur est survenue.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+    </script>
 </body>
 </html>

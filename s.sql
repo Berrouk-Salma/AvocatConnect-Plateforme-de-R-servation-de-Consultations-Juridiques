@@ -9,7 +9,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
-    role ENUM('client', 'avocat', 'admin') NOT NULL,
+    role ENUM('client', 'avocat',) NOT NULL,
     address TEXT,
     birthday DATE,
     cin VARCHAR(20),
@@ -34,10 +34,10 @@ CREATE TABLE disponibilite (
     date_debut DATETIME NOT NULL,
     date_fin DATETIME NOT NULL,
     status ENUM('available', 'booked', 'unavailable') DEFAULT 'available',
-    id_avocat INT,
+    id_user INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_avocat) REFERENCES users(id)
+    FOREIGN KEY (id_user) REFERENCES users(id)
 );
 
 -- Reservation table
