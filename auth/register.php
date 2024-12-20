@@ -1,5 +1,5 @@
 <?php
-// require '../includes/config.php';
+    include('../assets/includes/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = $mysqli->real_escape_string(trim($_POST['firstname']));

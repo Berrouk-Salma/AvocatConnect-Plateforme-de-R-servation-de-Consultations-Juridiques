@@ -1,6 +1,6 @@
 <?php
-require_once '../includes/config.php';
-
+require_once '../assets/includes/config.php';
+session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $mysqli->real_escape_string($_POST['email']);
     $password = $_POST['password'];
@@ -20,9 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Redirect based on role
             if ($user['role'] === 'avocat') {
-                header("Location: ../lawyer/dashboard.php");
+              
+                header("Location: ../assets/lawyer/dashboards.php");
             } else {
-                header("Location: ../user/dashboard.php");
+                header("Location: ../assets/user/dashboard.php");
             }
             exit();
         } else {

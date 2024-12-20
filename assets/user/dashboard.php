@@ -1,7 +1,7 @@
 <?php
 session_start();
-// require '../includes/config.php';
-require '../includes/function.php';
+    include('../includes/config.php');
+// require '../includes/function.php';
 
 // if (!isset($_SESSION['user_id'])){
 //     header('Location: ./../../auth/login.php');
@@ -59,7 +59,7 @@ $appointments = $stmt->get_result();
                     <span class="text-[#bb9a4f] mr-4">
                         <?php echo htmlspecialchars($user['firstname'] . ' ' . $user['lastname']); ?>
                     </span>
-                    <a href="../logout.php" class="text-[#bb9a4f] hover:text-[#a68a45] border border-[#bb9a4f] px-4 py-2 rounded hover:bg-[#bb9a4f] hover:text-[#001a10]">
+                    <a href="../../auth/logout.php" class="text-[#bb9a4f] hover:text-[#a68a45] border border-[#bb9a4f] px-4 py-2 rounded hover:bg-[#bb9a4f] hover:text-[#001a10]">
                         Déconnexion
                     </a>
                 </div>

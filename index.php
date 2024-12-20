@@ -21,8 +21,8 @@
                     Déconnexion
                 </a>
             <?php else: ?>
-                <a href="login.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Se connecter</a>
-                <a href="register.php" class="text-[#bb9a4f] border border-[#bb9a4f] px-4 py-2 hover:bg-[#bb9a4f] hover:text-[#001a10]">
+                <a href="./auth/login.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Se connecter</a>
+                <a href="./auth/register.php" class="text-[#bb9a4f] border border-[#bb9a4f] px-4 py-2 hover:bg-[#bb9a4f] hover:text-[#001a10]">
                     S'inscrire
                 </a>
             <?php endif; ?>
@@ -31,7 +31,7 @@
 </nav>
 <body class="bg-[#001a10]">
     <!-- En-tête -->
-     
+
     <!-- Section Hero -->
     <section class="relative min-h-screen">
         <div class="absolute inset-0">

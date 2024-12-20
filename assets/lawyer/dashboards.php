@@ -1,12 +1,13 @@
 <?php
 require_once '../includes/config.php';
-require_once '../includes/functions.php';
-
+require_once '../includes/function.php';
+    session_start();
 // Vérification si l'utilisateur est connecté et est un avocat
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'avocat') {
-    header('Location: ../login.php');
-    exit();
-}
+// if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'avocat') {
+//     header('Location: ./');
+//     exit();
+// }
+echo $_SESSION['user_id'] ." " . $_SESSION['role'] ;
 
 // Récupérer les informations de l'avocat
 $avocat_id = $_SESSION['user_id'];
@@ -82,7 +83,7 @@ $today_count = $stmt->get_result()->fetch_row()[0];
                     <span class="text-[#bb9a4f] mr-4">
                         <?php echo htmlspecialchars($avocat['firstname'] . ' ' . $avocat['lastname']); ?>
                     </span>
-                    <a href="../logout.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Déconnexion</a>
+                    <a href="../../auth/logout.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Déconnexion</a>
                 </div>
             </div>
         </div>
