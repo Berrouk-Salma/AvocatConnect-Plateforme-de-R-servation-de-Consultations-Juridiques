@@ -31,8 +31,7 @@
 </nav>
 <body class="bg-[#001a10]">
     <!-- En-tête -->
-  
-
+     
     <!-- Section Hero -->
     <section class="relative min-h-screen">
         <div class="absolute inset-0">
