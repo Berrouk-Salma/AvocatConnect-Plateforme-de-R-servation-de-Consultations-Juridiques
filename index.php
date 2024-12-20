@@ -7,18 +7,31 @@
     <link rel="stylesheet" href="./assets/css/style.css">
     <title>Cabinet d'Avocats</title>
 </head>
+<nav class="p-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <span class="text-yellow-500 text-2xl">⚖ LawQuill</span>
+        <div class="flex gap-4">
+            <?php if(isset($_SESSION['user_id'])): ?>
+                <?php if($_SESSION['role'] === 'avocat'): ?>
+                    <a href="avocat/dashboard.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Dashboard</a>
+                <?php elseif($_SESSION['role'] === 'client'): ?>
+                    <a href="client/dashboard.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Dashboard</a>
+                <?php endif; ?>
+                <a href="logout.php" class="text-[#bb9a4f] border border-[#bb9a4f] px-4 py-2 hover:bg-[#bb9a4f] hover:text-[#001a10]">
+                    Déconnexion
+                </a>
+            <?php else: ?>
+                <a href="login.php" class="text-[#bb9a4f] hover:text-[#a68a45]">Se connecter</a>
+                <a href="register.php" class="text-[#bb9a4f] border border-[#bb9a4f] px-4 py-2 hover:bg-[#bb9a4f] hover:text-[#001a10]">
+                    S'inscrire
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+</nav>
 <body class="bg-[#001a10]">
     <!-- En-tête -->
-    <header class="p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center">
-                <span class="text-yellow-500 text-2xl">⚖ LawQuill</span>
-            </div>
-            <button class="text-yellow-500 border border-yellow-500 px-4 py-2">
-                
-            </button>
-        </div>
-    </header>
+  
 
     <!-- Section Hero -->
     <section class="relative min-h-screen">
@@ -348,27 +361,27 @@
                 <h3 class="text-[#bb9a4f] text-3xl font-light mb-6 transition-transform duration-300 group-hover:-translate-y-1">
                     Email Us At
                 </h3>
-                <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
+                <a href="mailto:salmaberrouk4@gmail.com" class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
                     salmaberrouk4@gmail.com
-                </p>
+                </a>
             </div>
 
             <div class="group cursor-pointer">
                 <h3 class="text-[#bb9a4f] text-3xl font-light mb-6 transition-transform duration-300 group-hover:-translate-y-1">
                     Give Us A Call
                 </h3>
-                <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
+                <a href="tel:+212-649236388" class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
                     +212-649236388
-                </p>
+                </a>
             </div>
 
             <div class="group cursor-pointer">
                 <h3 class="text-[#bb9a4f] text-3xl font-light mb-6 transition-transform duration-300 group-hover:-translate-y-1">
                     Visit Us At
                 </h3>
-                <p class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
-                https://github.com/Berrouk-Salma
-                </p>
+                <a href="https://github.com/Berrouk-Salma" class="text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
+                Berrouk-Salma
+                </a>
             </div>
         </div>
     </div>
